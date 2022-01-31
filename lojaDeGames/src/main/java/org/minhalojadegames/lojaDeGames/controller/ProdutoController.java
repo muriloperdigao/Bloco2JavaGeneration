@@ -25,55 +25,62 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/produto")
 public class ProdutoController {
-	
-	//informa que puxará do repositorio
-	
+
+	// informa que puxará do repositorio
+
 	@Autowired
 	private ProdutoRepository repository;
-	
-	//apresentará a lista de produtos e informará que está "ok"
-	
+
+	// apresentará a lista de produtos e informará que está "ok"
+
 	@GetMapping
-	public ResponseEntity<List<Produto>> getAll(){
+	public ResponseEntity<List<Produto>> getAll() {
+		
 		return ResponseEntity.ok(repository.findAll());
 	}
-	
-	//end-point para caso eu insira o ID do produto
-	//apresentará o produto de ID específico ou "not found" caso o ID não esteja cadastrado
-	
+
+	// end-point para caso eu insira o ID do produto
+	// apresentará o produto de ID específico ou "not found" caso o ID não esteja
+	// cadastrado
+
 	@GetMapping("/{id}")
-	public ResponseEntity<Produto> getById(@PathVariable long id){
+	public ResponseEntity<Produto> getById(@PathVariable long id) {
+		
 		return repository.findById(id)
-			.map(resp -> ResponseEntity.ok(resp))
-			.orElse(ResponseEntity.notFound().build());
+				.map(resp -> ResponseEntity.ok(resp))
+				.orElse(ResponseEntity.notFound().build());
 	}
-	
-	//end-point para que apresente o produto caso eu escreva o nome dele na URL após /nome/
-	
+
+	// end-point para que apresente o produto caso eu escreva o nome dele na URL
+	// após /nome/
+
 	@GetMapping("/nome/{nome}")
-	public ResponseEntity<List<Produto>> getByName(@PathVariable String nome){
+	public ResponseEntity<List<Produto>> getByName(@PathVariable String nome) {
+		
 		return ResponseEntity.ok(repository.findAllByNomeContainingIgnoreCase(nome));
 	}
-	
-	
-	//end-point para realizar postagens e popular a tabela de produtos
-	//apresentará o httpstatus de "criado" quando inserir o dado
-	
+
+	// end-point para realizar postagens e popular a tabela de produtos
+	// apresentará o httpstatus de "criado" quando inserir o dado
+
 	@PostMapping
-	public ResponseEntity<Produto> post(@RequestBody Produto produto){
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(repository.save(produto));
+	public ResponseEntity<Produto> post(@Valid @RequestBody Produto produto) {
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(produto));
 	}
-	
-	//end-point para substituir algum dado da tabela produto
-	
+
+	// end-point para substituir algum dado da tabela produto
+
 	@PutMapping
-	public ResponseEntity<Produto> put(@Valid @RequestBody Produto produto){
-		return ResponseEntity.ok(repository.save(produto));
+	public ResponseEntity<Produto> put(@Valid @RequestBody Produto produto) {
+		
+		return repository.findById(produto.getId()).map(resposta -> {
+			return ResponseEntity.ok().body(repository.save(produto));
+		}).orElse(ResponseEntity.notFound().build());
 	}
-	
-	//deleta alguma linha da tabela de acordo com a informação encaminhada
-	
+
+	// deleta alguma linha da tabela de acordo com a informação encaminhada
+
 	@DeleteMapping("/{id}")
 	public void delete(@PathVariable long id) {
 		repository.deleteById(id);
